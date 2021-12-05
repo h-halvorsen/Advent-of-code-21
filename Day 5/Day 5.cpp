@@ -55,24 +55,103 @@ cord max(const string inFile)
         if (y > output.y) output.y = y;
 
     }
+    
+    output.x++;
+    output.y++;
+    
     input.close();
     printf("X-Max: %i, Y-Max: %i\n", output.x, output.y);
     return output;
 }
 
-void clean(const string inFile, const string& outFile)
+int max(int a, int b)
+{
+    return a > b ? a : b;
+}
+
+int min(int a, int b)
+{
+    return a < b ? a : b;
+}
+
+int partA(const string inFile, int* map, cord& size)
 {
     ifstream input(inFile);
-    if (input.bad()) return;
-    string line;
-    
-    while (getline(input, line))
-    {
+    if (input.bad()) return-1;
 
+    string lineA, lineB;
+    cord cordA, cordB;
+
+    while (getline(input, lineA) && getline(input, lineB))
+    {
+        stringstream streamA(lineA);
+        stringstream streamB(lineB);
+
+        streamA >> cordA.x >> cordA.y;
+        streamB >> cordB.x >> cordB.y;
+
+        if (cordA.x == cordB.x)
+        {
+            int end = max(cordB.y, cordA.y);
+            for (int i = min(cordB.y, cordA.y); i <= end; i++)
+            {
+                map[cordA.x + i * size.y]++;
+            }
+        }
+
+        else if (cordA.y == cordB.y)
+        {
+            int end = max(cordB.x, cordA.x);
+            for (int i = min(cordB.x, cordA.x); i <= end; i++)
+            {
+                map[i + cordA.y * size.y]++;
+            }
+        }
     }
-    
     input.close();
-    return;
+
+    int count = 0;
+    for (int i = 0; i < size.x * size.y; i++)
+    {
+        if (map[i] > 1) count ++;
+    }
+    return count;
+}
+
+int partB(const string inFile, int* map, cord& size)
+{
+    ifstream input(inFile);
+    if (input.bad()) return-1;
+
+    string lineA, lineB;
+    cord a, b;
+
+    while (getline(input, lineA) && getline(input, lineB))
+    {
+        stringstream streamA(lineA);
+        stringstream streamB(lineB);
+
+        streamA >> a.x >> a.y;
+        streamB >> b.x >> b.y;
+
+        if (abs(a.x - b.x) == abs(a.y - b.y))
+        {
+            int endCond = max(a.y, b.y);
+            int start = min(a.x, b.x);
+            for (int i = min(a.y, b.y); i <= endCond; i++)
+            {
+                map[start++ + i * size.y]++;
+            }
+        }
+    }
+    input.close();
+
+    int count = 0;
+    for (int i = 0; i < size.x * size.y; i++)
+    {
+        if (map[i] > 1) count++;
+    }
+    return count;
 }
 
 int main()
@@ -80,13 +159,18 @@ int main()
     const string inFile = "./input.txt";
     const string temp1 = "./tmp1.txt";
     const string temp2 = "./tmp2.txt";
-    const string outFile = "./output.txt";
 
     preProc(inFile, temp1);
-    clean(temp1, temp2);
-    cord extreme = max(temp1);
+    cord size = max(temp1);
     
+    int* map = new int[size.x * size.y];
+    for (int i = 0; i < size.x * size.y; i++)
+    {
+        map[i] = 0;
+    }
 
 
+    cout << "Part a: " << partA(temp2, map, size) << endl;
+    cout << "Part b: " << partB(temp2, map, size) << endl;
 }
 
